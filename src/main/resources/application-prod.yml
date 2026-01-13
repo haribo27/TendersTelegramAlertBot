@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/tender_alert_bot
+    url: jdbc:postgresql://tenderbot-postgres:5432/tender_alert_bot
     username: tenderbot
     password: 77777751
 
