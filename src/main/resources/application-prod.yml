@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/telegram_alert_bot?currentSchema=public
-    username: postgres
-    password: 123
+    url: jdbc:postgresql://localhost:5432/telegram_alert_bot
+    username: tenderbot
+    password: 77777751
 
   flyway:
     enabled: true
@@ -13,4 +13,4 @@ spring:
 
   config:
     activate:
-      on-profile: dev
+      on-profile: prod
