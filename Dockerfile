@@ -8,9 +8,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-# В Alpine обновление сертификатов быстрое
-RUN apk add --no-cache ca-certificates && update-ca-certificates
-
-ENV JAVA_OPTS="-Dhttps.protocols=TLSv1.2"
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java",
+ "-Djdk.tls.client.protocols=TLSv1.2",
+ "-Dhttps.protocols=TLSv1.2",
+ "-jar", "app.jar"]
