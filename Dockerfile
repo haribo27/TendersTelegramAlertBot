@@ -10,9 +10,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-# Устанавливаем curl для тестов и возможностей fetch через ProcessBuilder (если нужно)
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
