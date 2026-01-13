@@ -83,19 +83,19 @@ public class ZakupkiRssParser {
 
     public String fetch(String url) {
         try {
-            Process process = new ProcessBuilder(
-                    "curl",
-                    "-s",
-                    "-L",
-                    "--compressed",
-                    "--connect-timeout", "15",
-                    "--max-time", "30",
-                    url
-            ).start();
+            ProcessBuilder pb = new ProcessBuilder("curl", "-sS", url);
+            pb.redirectErrorStream(true); // объединяем stdout + stderr
+            Process process = pb.start();
 
             byte[] bytes = process.getInputStream().readAllBytes();
-            return new String(bytes, StandardCharsets.UTF_8);
+            int exitCode = process.waitFor();
+            String result = new String(bytes, StandardCharsets.UTF_8);
 
+            if (exitCode != 0) {
+                throw new RuntimeException("Curl exited with code " + exitCode + ". Output:\n" + result);
+            }
+
+            return result;
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch RSS via curl", e);
         }
