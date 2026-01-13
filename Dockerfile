@@ -1,12 +1,13 @@
 # Сборка
-FROM maven:3.9.6-eclipse-temurin-19 AS build
-WORKDIR /build
+# Используем официальный образ Maven с Java 17 (самая стабильная версия)
+FROM maven:3.8.7-eclipse-temurin-17 AS builder
+WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Запуск
-FROM eclipse-temurin:21-jre
+# Финальный образ
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /build/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
