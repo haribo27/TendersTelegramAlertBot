@@ -8,7 +8,6 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
-ENTRYPOINT ["java",
- "-Djdk.tls.client.protocols=TLSv1.2",
- "-Dhttps.protocols=TLSv1.2",
- "-jar", "app.jar"]
+ENV JAVA_OPTS="-Djdk.tls.client.protocols=TLSv1.2 -Dhttps.protocols=TLSv1.2"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
