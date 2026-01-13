@@ -34,12 +34,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     public TelegramBot() {
-        super("8403020132:AAG_OW8vDR_GxbGBCMXNEj3JuSQ7Iq49CYg");
+        super(BotConfig.getBotToken());
     }
 
     @Override
     public String getBotUsername() {
-        return "tendersalertbot";
+        return BotConfig.getBotUsername();
     }
 
     @PostConstruct
