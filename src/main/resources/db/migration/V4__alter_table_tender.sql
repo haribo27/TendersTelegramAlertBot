@@ -1,0 +1,1 @@
+alter table tender add column regulation_code varchar(32);
