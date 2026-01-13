@@ -9,5 +9,5 @@ RUN mvn clean package -DskipTests
 # Финальный образ
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar TelegramAlertBot.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
