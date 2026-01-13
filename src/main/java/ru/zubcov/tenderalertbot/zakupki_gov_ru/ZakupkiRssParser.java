@@ -14,6 +14,7 @@ import ru.zubcov.tenderalertbot.zakupki_gov_ru.dto.ParsedFilteredRssTendersDto;
 import ru.zubcov.tenderalertbot.zakupki_gov_ru.dto.Tender44FzEisDto;
 import ru.zubcov.tenderalertbot.zakupki_gov_ru.eis_rss_history.EisRssHistoryService;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,13 +61,10 @@ public class ZakupkiRssParser {
         try {
             log.info("Parsing RSS Feed... Date: {}", LocalDateTime.now());
 
+            String xml = fetch(RSS_URL);
+
             Document doc = Jsoup
-                    .connect(RSS_URL)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-                            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                    .parser(Parser.xmlParser())
-                    .timeout(15_000)
-                    .get();
+                    .parse(xml, "", Parser.xmlParser());
 
             List<Element> itemElements = doc.select("item");
 
@@ -79,6 +77,26 @@ public class ZakupkiRssParser {
         } catch (Exception e) {
             System.err.println("Ошибка при парсинге RSS: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public String fetch(String url) {
+        try {
+            Process process = new ProcessBuilder(
+                    "curl",
+                    "-s",
+                    "-L",
+                    "--compressed",
+                    "--connect-timeout", "15",
+                    "--max-time", "30",
+                    url
+            ).start();
+
+            byte[] bytes = process.getInputStream().readAllBytes();
+            return new String(bytes, StandardCharsets.UTF_8);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch RSS via curl", e);
         }
     }
 
