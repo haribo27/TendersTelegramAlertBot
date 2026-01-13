@@ -6,15 +6,24 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import ru.zubcov.tenderalertbot.tender.Tender;
 import ru.zubcov.tenderalertbot.utils.UtilsTenderParser;
 import ru.zubcov.tenderalertbot.zakupki_gov_ru.dto.ParsedFilteredRssTendersDto;
 import ru.zubcov.tenderalertbot.zakupki_gov_ru.dto.Tender44FzEisDto;
 import ru.zubcov.tenderalertbot.zakupki_gov_ru.eis_rss_history.EisRssHistoryService;
 
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,6 +49,7 @@ public class ZakupkiRssParser {
 
     private final ZakupkiTenderParser zakupkiTenderParser;
     private final EisRssHistoryService eisRssHistoryService;
+    private final RestTemplate restTemplate;
 
     private static final List<String> KEYWORDS = List.of(
             "клининг", "клининговые услуги", "услуги уборки",
@@ -61,7 +71,7 @@ public class ZakupkiRssParser {
         try {
             log.info("Parsing RSS Feed... Date: {}", LocalDateTime.now());
 
-            String xml = fetch(RSS_URL);
+            String xml = fetchRssWithRestTemplate(RSS_URL);
             log.info("Start of xml {}", xml.substring(0, 15));
 
             Document doc = Jsoup
@@ -81,23 +91,15 @@ public class ZakupkiRssParser {
         }
     }
 
-    public String fetch(String url) {
-        try {
-            ProcessBuilder pb = new ProcessBuilder("curl", "-sS", url);
-            pb.redirectErrorStream(true); // объединяем stdout + stderr
-            Process process = pb.start();
+    public String fetchRssWithRestTemplate(String url) {
 
-            byte[] bytes = process.getInputStream().readAllBytes();
-            int exitCode = process.waitFor();
-            String result = new String(bytes, StandardCharsets.UTF_8);
+        // Делаем GET-запрос
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-            if (exitCode != 0) {
-                throw new RuntimeException("Curl exited with code " + exitCode + ". Output:\n" + result);
-            }
-
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch RSS via curl", e);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Failed to fetch RSS. Status: " + response.getStatusCode());
         }
     }
 
