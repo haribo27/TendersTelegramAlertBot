@@ -62,6 +62,7 @@ public class ZakupkiRssParser {
             log.info("Parsing RSS Feed... Date: {}", LocalDateTime.now());
 
             String xml = fetch(RSS_URL);
+            log.info("Start of xml {}", xml.substring(0, 15));
 
             Document doc = Jsoup
                     .parse(xml, "", Parser.xmlParser());
